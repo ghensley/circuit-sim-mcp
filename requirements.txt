@@ -1,0 +1,9 @@
+mcp>=1.0.0
+pyspice>=1.4.0
+numpy>=1.21.0
+matplotlib>=3.5.0
+pydantic>=2.0.0
+pytest>=7.0.0
+black>=22.0.0
+isort>=5.0.0
+mypy>=1.0.0 
