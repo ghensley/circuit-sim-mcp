@@ -267,8 +267,7 @@ class CircuitSimServer:
 def run():
     """Run the basic circuit simulation MCP server."""
     sim_server = CircuitSimServer()
-    from mcp.server.fastmcp import FastMCP
-    FastMCP.run(transport="stdio")
+    sim_server.server.run(transport="stdio")
 
 
 if __name__ == "__main__":
