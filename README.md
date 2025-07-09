@@ -152,6 +152,27 @@ See `examples/simple_voltage_divider.py` for a complete working example.
 - `vin`, `vout` (instead of `in`, `out`)
 - `vcc`, `vdd`, `gnd` (instead of `class`, `def`, `if`)
 
+## Branch Structure
+
+This repository has two main branches with different feature sets:
+
+### 🌟 `main` branch (Current - Basic Version)
+- **Purpose**: Core circuit simulation functionality
+- **Target**: Users who need basic circuit analysis
+- **Features**: Essential circuit creation, simulation (DC/AC/Transient), and data export
+- **Complexity**: Simple, focused, easy to understand and extend
+
+### 🚀 `advanced-features` branch
+- **Purpose**: Full-featured version with AI-powered analysis
+- **Target**: Professional users and complex circuit design
+- **Features**: Everything in main + intelligent datasheet prompting, complexity analysis, datasheet-based components
+- **Complexity**: Advanced features for sophisticated circuit analysis
+
+To access advanced features:
+```bash
+git checkout advanced-features
+```
+
 ## Architecture
 
 - **`server_basic.py`**: Basic MCP server implementation using FastMCP
