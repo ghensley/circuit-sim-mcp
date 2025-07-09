@@ -1,6 +1,6 @@
 # Circuit Simulation MCP Server
 
-A Model Context Protocol (MCP) server that provides circuit simulation capabilities using PySpice. This server allows you to create, simulate, and analyze electronic circuits through a simple tool-based interface.
+A Model Context Protocol (MCP) server that provides advanced circuit simulation capabilities using PySpice, featuring intelligent datasheet prompting and complexity analysis.
 
 ## Features
 
@@ -12,6 +12,12 @@ A Model Context Protocol (MCP) server that provides circuit simulation capabilit
 - **Circuit Management**: List circuits, get detailed information, export data
 - **Visualization**: Generate plots of simulation results
 - **SPICE Integration**: Uses PySpice for accurate circuit simulation
+- **🧠 Intelligent Datasheet Prompting**: 
+  - Automatic circuit complexity analysis
+  - Smart datasheet upload recommendations
+  - Priority-based prompts (Critical, Recommended, Optional)
+  - Real-time simulation confidence assessment
+- **🔧 Datasheet-Based Components**: Support for real electronic components with manufacturer specifications
 
 ## Installation
 
@@ -70,14 +76,28 @@ Configure your MCP client to use this server:
 
 ### Available Tools
 
+#### Core Circuit Tools
 1. **`create_circuit`** - Create a new circuit with components
-2. **`simulate_dc`** - Perform DC analysis
-3. **`simulate_ac`** - Perform AC analysis  
-4. **`simulate_transient`** - Perform transient analysis
-5. **`plot_results`** - Generate plots
-6. **`export_data`** - Export simulation data
-7. **`list_circuits`** - List all circuits
-8. **`get_circuit_info`** - Get detailed circuit information
+2. **`create_smart_circuit`** - Create circuit with automatic complexity analysis and datasheet recommendations
+3. **`simulate_dc`** - Perform DC analysis
+4. **`simulate_ac`** - Perform AC analysis  
+5. **`simulate_transient`** - Perform transient analysis
+6. **`simulate_with_guidance`** - Perform simulation with intelligent datasheet guidance
+7. **`plot_results`** - Generate plots
+8. **`export_data`** - Export simulation data
+9. **`list_circuits`** - List all circuits
+10. **`get_circuit_info`** - Get detailed circuit information
+
+#### Intelligent Analysis Tools
+11. **`analyze_circuit_complexity`** - Analyze circuit complexity and get datasheet recommendations
+12. **`get_datasheet_prompts`** - Get intelligent datasheet upload prompts for a circuit
+13. **`validate_circuit_design`** - Validate circuit design against component specifications
+14. **`optimize_circuit_design`** - Get optimization recommendations based on datasheet analysis
+
+#### Datasheet Component Tools
+15. **`create_datasheet_circuit`** - Create circuit using datasheet-based components
+16. **`search_components`** - Search for components in the datasheet library
+17. **`get_component_datasheet`** - Get detailed datasheet information for a component
 
 ## Example
 
@@ -85,7 +105,7 @@ Here's a simple voltage divider example:
 
 ```python
 import asyncio
-from circuit_sim_mcp.server_basic import CircuitSimServer
+from circuit_sim_mcp.server import CircuitSimServer
 
 async def main():
     sim_server = CircuitSimServer()
@@ -97,7 +117,7 @@ async def main():
             "type": "voltage_source",
             "name": "V1",
             "voltage": 10.0,
-            "nodes": ["vin", "gnd"],
+            "nodes": ["vin", "0"],
             "source_type": "DC"
         },
         {
@@ -110,7 +130,7 @@ async def main():
             "type": "resistor",
             "name": "R2", 
             "resistance": 1000.0,
-            "nodes": ["vout", "gnd"]
+            "nodes": ["vout", "0"]
         }
     ]
     
@@ -123,7 +143,7 @@ async def main():
     # Perform DC analysis
     dc_result = await server.call_tool("simulate_dc", {
         "circuit_name": "voltage_divider",
-        "output_nodes": ["vin", "vout", "gnd"]
+        "output_nodes": ["vin", "vout", "0"]
     })
     
     print(f"DC Analysis: {dc_result}")
@@ -154,9 +174,11 @@ See `examples/simple_voltage_divider.py` for a complete working example.
 
 ## Architecture
 
-- **`server_basic.py`**: Basic MCP server implementation using FastMCP
+- **`server.py`**: Main MCP server implementation using FastMCP
 - **`circuit.py`**: Circuit representation and component definitions
 - **`simulator.py`**: PySpice integration and simulation engine
+- **`circuit_analyzer.py`**: Circuit complexity analysis and intelligent datasheet prompting
+- **`datasheet_components.py`**: Datasheet-based component implementations
 - **`__main__.py`**: Entry point for running the server
 
 ## Development
@@ -190,14 +212,6 @@ If you get PySpice import errors:
 ### Node Name Errors
 
 If you get errors about node names being Python keywords, rename your nodes to avoid reserved words.
-
-## Advanced Features
-
-For advanced features like intelligent datasheet prompting, circuit complexity analysis, and datasheet-based components, check out the `advanced-features` branch:
-
-```bash
-git checkout advanced-features
-```
 
 ## License
 
