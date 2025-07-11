@@ -71,12 +71,23 @@ class Resistor(Component):
     """Resistor component."""
     
     component_type: str = "resistor"
-    resistance: float = Field(description="Resistance in ohms")
+    resistance: Optional[float] = Field(default=None, description="Resistance in ohms")
     
     def __init__(self, **data):
+        # Handle the case where 'value' is provided instead of 'resistance'
+        if 'value' in data and 'resistance' not in data:
+            data['resistance'] = data['value']
+        elif 'resistance' not in data and self.value is not None:
+            data['resistance'] = self.value
+        
         super().__init__(**data)
-        if self.value is None:
+        
+        # Ensure resistance is set
+        if self.resistance is None and self.value is not None:
+            self.resistance = self.value
+        elif self.value is None and self.resistance is not None:
             self.value = self.resistance
+            
         if self.unit is None:
             self.unit = "Ω"
 
@@ -113,13 +124,24 @@ class VoltageSource(Component):
     """Voltage source component."""
     
     component_type: str = "voltage_source"
-    voltage: float = Field(description="Voltage in volts")
+    voltage: Optional[float] = Field(default=None, description="Voltage in volts")
     source_type: str = Field(default="DC", description="Source type (DC, AC, pulse, etc.)")
     
     def __init__(self, **data):
+        # Handle the case where 'value' is provided instead of 'voltage'
+        if 'value' in data and 'voltage' not in data:
+            data['voltage'] = data['value']
+        elif 'voltage' not in data and self.value is not None:
+            data['voltage'] = self.value
+        
         super().__init__(**data)
-        if self.value is None:
+        
+        # Ensure voltage is set
+        if self.voltage is None and self.value is not None:
+            self.voltage = self.value
+        elif self.value is None and self.voltage is not None:
             self.value = self.voltage
+            
         if self.unit is None:
             self.unit = "V"
 
@@ -202,24 +224,53 @@ class Circuit:
     
     def _component_to_netlist(self, component: Component) -> str:
         """Convert a component to SPICE netlist format."""
+        # Clean component name by removing any existing SPICE prefix
+        clean_name = self._clean_component_name(component.name)
+        
         if component.component_type == "resistor":
-            return f"R{component.name} {' '.join(component.nodes)} {component.value}"
+            return f"R{clean_name} {' '.join(component.nodes)} {component.value}"
         elif component.component_type == "capacitor":
-            return f"C{component.name} {' '.join(component.nodes)} {component.value}"
+            return f"C{clean_name} {' '.join(component.nodes)} {component.value}"
         elif component.component_type == "inductor":
-            return f"L{component.name} {' '.join(component.nodes)} {component.value}"
+            return f"L{clean_name} {' '.join(component.nodes)} {component.value}"
         elif component.component_type == "voltage_source":
-            return f"V{component.name} {' '.join(component.nodes)} {component.value}"
+            return f"V{clean_name} {' '.join(component.nodes)} {component.value}"
         elif component.component_type == "current_source":
-            return f"I{component.name} {' '.join(component.nodes)} {component.value}"
+            return f"I{clean_name} {' '.join(component.nodes)} {component.value}"
         elif component.component_type == "diode":
             model = f" {component.model}" if component.model else ""
-            return f"D{component.name} {' '.join(component.nodes)}{model}"
+            return f"D{clean_name} {' '.join(component.nodes)}{model}"
         elif component.component_type == "transistor":
             model = f" {component.model}" if component.model else ""
-            return f"Q{component.name} {' '.join(component.nodes)}{model}"
+            return f"Q{clean_name} {' '.join(component.nodes)}{model}"
         else:
             return f"* Unknown component: {component.name}"
+    
+    def _clean_component_name(self, name: str) -> str:
+        """Remove SPICE prefix from component name if it exists."""
+        # List of SPICE prefixes to remove
+        spice_prefixes = ['R', 'C', 'L', 'V', 'I', 'D', 'Q', 'M', 'J']
+        
+        # Special cases to avoid false positives
+        special_cases = ['LED', 'LCD', 'LDR']  # Don't strip L from these
+        
+        # Check for special cases first
+        for special in special_cases:
+            if name.startswith(special):
+                return name  # Don't clean special cases
+        
+        # Check if name starts with a SPICE prefix followed by underscore or other character
+        for prefix in spice_prefixes:
+            if name.startswith(prefix) and len(name) > 1:
+                # If followed by underscore, remove prefix and underscore
+                if name.startswith(f"{prefix}_"):
+                    return name[2:]
+                # If followed by letter/number, remove just the prefix
+                elif name[1].isalnum():
+                    return name[1:]
+        
+        # If no prefix found, return name as-is
+        return name
 
 
 class SimulationResults(BaseModel):
